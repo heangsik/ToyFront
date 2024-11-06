@@ -6,6 +6,7 @@
 	<nav class="nav_bar">
 		<ul class="">
 			<li><a href="/">Home</a></li>
+			<li><a href="/login">Login</a></li>
 			<li><a href="/about">About</a></li>
 		</ul>
 	</nav>
