@@ -1,26 +1,58 @@
-<svelte:head>
-	<title>About</title>
-	<meta name="description" content="About this app" />
-</svelte:head>
+<script lang="ts">
+	import { userAction } from '../../store/store';
+</script>
 
-<div class="text-column">
-	<h1>About this app</h1>
-
-	<p>
-		This is a <a href="https://svelte.dev/docs/kit">SvelteKit</a> app. You can make your own by typing
-		the following into your command line and following the prompts:
-	</p>
-
-	<pre>npx sv create</pre>
-
-	<p>
-		The page you're looking at is purely static HTML, with no client-side interactivity needed.
-		Because of that, we don't need to load any JavaScript. Try viewing the page's source, or opening
-		the devtools network panel and reloading.
-	</p>
-
-	<p>
-		The <a href="/sverdle">Sverdle</a> page illustrates SvelteKit's data loading and form handling. Try
-		using it with JavaScript disabled!
-	</p>
+<div class="container">
+	<div>{JSON.stringify(userAction)}</div>
+	<div>
+		{#if $userAction}
+			<div class="auth-info">
+				<h2>인증 정보</h2>
+				<div class="info-item">
+					<span class="label">로그인 상태:</span>
+					<span class="value">{$userAction.isLogin ? '로그인됨' : '로그아웃'}</span>
+				</div>
+				{#if $userAction.user}
+					<div class="info-item">
+						<span class="label">사용자 정보:</span>
+						<span class="value">{JSON.stringify($userAction.user, null, 2)}</span>
+					</div>
+				{/if}
+				<div class="info-item">
+					<span class="label">액세스 토큰:</span>
+					<span class="value">{$userAction.accessToken || '없음'}</span>
+				</div>
+				<div class="info-item">
+					<span class="label">리프레시 토큰:</span>
+					<span class="value">{$userAction.refreshToken || '없음'}</span>
+				</div>
+			</div>
+		{/if}
+	</div>
 </div>
+
+<style lang="scss">
+	.container {
+		@apply p-4;
+	}
+
+	.auth-info {
+		@apply bg-white rounded-lg shadow p-6;
+	}
+
+	h2 {
+		@apply text-2xl font-bold mb-4;
+	}
+
+	.info-item {
+		@apply mb-3;
+	}
+
+	.label {
+		@apply font-semibold mr-2;
+	}
+
+	.value {
+		@apply text-gray-600 break-all;
+	}
+</style>

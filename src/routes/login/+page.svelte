@@ -11,53 +11,48 @@
 		event.preventDefault();
 		loading = true;
 		error = '';
+		console.log('submitting form data: ', formData);
+
 		const response = await userAction.login(formData);
 		console.log(`response data: ${JSON.stringify(response)}`);
 
-		// try {
-		// 	const response = await fetch('http://localhost:9988/auth/login', {
-		// 		method: 'POST',
-		// 		headers: {
-		// 			'Content-Type': 'application/json'
-		// 		},
-		// 		body: JSON.stringify(formData)
-		// 	});
-		// 	if (!response.ok) {
-		// 		throw new Error('Login failed');
-		// 	}
-
-		// 	const data = await response.json();
-		// 	console.log(`response data: ${data}`);
-		// 	console.log(`response data: ${JSON.stringify(data)}`);
-		// } catch (err: any) {
-		// 	error = err instanceof Error ? err.message : 'An error occurred';
-		// } finally {
-		// 	loading = false;
-		// }
+		loading = false;
+	}
+	async function logoutHdl() {
+		await userAction.logout();
 	}
 </script>
 
 <div class="container">
-	<form on:submit={handleSubmit}>
-		<div class="form-group">
-			<label for="username">Username:</label>
-			<input type="text" id="username" name="username" required bind:value={formData.email} />
-		</div>
-		<div class="form-group">
-			<label for="password">Password:</label>
-			<input
-				type="password"
-				id="password"
-				name="password"
-				required
-				bind:value={formData.password}
-			/>
-		</div>
-		<button type="submit" disabled={loading}>Login</button>
-		{#if error}
-			<p class="error">{error}</p>
-		{/if}
-	</form>
+	<!-- {$userAction} -->
+
+	{#if $userAction.isLogin}
+		<form on:submit={handleSubmit}>
+			<p>이미 로그인되어 있습니다.</p>
+			<button on:click={() => logoutHdl()} class="logout-button">LogOut</button>
+		</form>
+	{:else}
+		<form on:submit={handleSubmit}>
+			<div class="form-group">
+				<label for="username">Username:</label>
+				<input type="text" id="username" name="username" required bind:value={formData.email} />
+			</div>
+			<div class="form-group">
+				<label for="password">Password:</label>
+				<input
+					type="password"
+					id="password"
+					name="password"
+					required
+					bind:value={formData.password}
+				/>
+			</div>
+			<button type="submit" disabled={loading}>Login</button>
+			{#if error}
+				<p class="error">{error}</p>
+			{/if}
+		</form>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -87,7 +82,7 @@
 	}
 
 	button {
-		@apply p-3 bg-blue-500 text-white border-none rounded-s text-base cursor-pointer transition duration-300 ease-in-out;
+		@apply p-3 bg-blue-500 text-white border-none rounded-lg shadow-black shadow-sm text-base cursor-pointer transition duration-300 ease-in-out;
 		&:hover {
 			@apply bg-blue-700;
 		}
