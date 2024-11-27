@@ -39,5 +39,6 @@
 		"vitest": "^2.0.4"
 	},
 	"dependencies": {
+		"idb": "^8.0.0"
 	}
 }
