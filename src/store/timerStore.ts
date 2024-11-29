@@ -1,23 +1,16 @@
-import { writable, Writable } from "svelte/store";
-import { createDb, timerif } from '$lib/db/indexdb';
+import { writable, type Writable } from 'svelte/store';
+import { createDb, type Timer } from '$lib/db/indexdb';
+// import type { Timer } from '$lib/db/indexdb';
 
-export function timerStore() {
-    const initialState: timerif = {
-        intervals: [],
-        currentInterval: 0,
-        remainingSeconds: 0,
-        isRunning: false,
-        timerId: null,
-        message: ''
-    };
-    const { subscribe, set, update }: Writable<timerif> = writable(initialState);
-    return {
-        subscribe,
-        async loadDb() {
-            const db = createDb();
-            const timers = await db.getAll('timers');
-            db.close();
-            set(timers);
-        }
-    }
+export function TimerStore() {
+	const { subscribe, set, update }: Writable<Timer[]> = writable([]);
+	return {
+		subscribe,
+		async loadDb() {
+			const db = await createDb();
+			const timers = await db.getAll('timers');
+			await db.close();
+			set(timers);
+		}
+	};
 }

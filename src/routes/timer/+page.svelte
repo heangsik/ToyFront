@@ -1,29 +1,33 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte';
-	import { timerStore } from '../../store/timerStore';
+	import { TimerStore } from '../../store/timerStore';
+	import { Progressbar } from 'flowbite-svelte';
 
 	// 타이머 상태 관리
 	interface TimerState {
 		intervals: number[];
 		currentInterval: number;
 		remainingSeconds: number;
+		totalSeconds: number;
 		isRunning: boolean;
 		timerId: number | null;
 		message: string;
 	}
 
 	let state: TimerState = {
-		intervals: [5, 3, 5, 3], // 초단위
+		intervals: [], // 초단위
 		currentInterval: 0,
 		remainingSeconds: 0,
+		totalSeconds: 0,
 		isRunning: false,
 		timerId: null,
 		message: ''
 	};
 
 	let time = '00:00:00';
+	let newTimerTime = 0;
 
-	const tsimerStore = timerStore();
+	const tsimerStore = TimerStore();
 
 	// 시간 포맷팅
 	function formatTime(seconds: number): string {
@@ -52,6 +56,7 @@
 	// 타이머 초기화
 	function initializeTimer() {
 		state.remainingSeconds = state.intervals[state.currentInterval];
+		state.totalSeconds = state.remainingSeconds;
 		time = formatTime(state.remainingSeconds);
 		state.message = '';
 	}
@@ -73,6 +78,7 @@
 			stopTimer();
 		} else {
 			state.remainingSeconds = state.intervals[state.currentInterval];
+			state.totalSeconds = state.remainingSeconds;
 			initializeTimer();
 			playSound(true);
 			// setTimeout(startTimer, 1000);
@@ -81,6 +87,7 @@
 
 	// 타이머 시작
 	function startTimer() {
+		if (state.intervals.length === 0) return;
 		if (state.isRunning) return;
 
 		state.isRunning = true;
@@ -109,7 +116,14 @@
 	}
 
 	function addTime(seconds: number) {
-		console.log('addTime:', seconds);
+		newTimerTime += seconds;
+		// console.log('addTime:', seconds);
+	}
+	function addTimer() {
+		if (newTimerTime === 0) return;
+
+		state.intervals = [...state.intervals, newTimerTime];
+		newTimerTime = 0;
 	}
 
 	// 컴포넌트 정리
@@ -128,6 +142,23 @@
 			<button class="control-btn" on:click={startTimer} disabled={state.isRunning}> 시작 </button>
 			<button class="control-btn" on:click={stopTimer} disabled={!state.isRunning}> 정지 </button>
 		</div>
+		<div class="timer-list">
+			{#each state.intervals as timerunit}<div>{formatTime(timerunit)}</div>
+			{/each}
+		</div>
+		<div class="flex gap-0">
+			{#each Array(state.intervals.reduce((a, b) => a + b, 0)) as _, index}
+				<div class="border border-black h-4 w-1"></div>
+			{/each}
+		</div>
+		<div class="new-timer">{formatTime(newTimerTime)}</div>
+		<!-- <div>
+			{state.remainingSeconds}|{state.totalSeconds}|{(state.remainingSeconds / state.totalSeconds) *
+				100}
+		</div> -->
+		<div class="timer-progress">
+			<Progressbar progress={(state.remainingSeconds / state.totalSeconds) * 100} color="blue" />
+		</div>
 		<div class="add-control">
 			<button
 				type="button"
@@ -144,6 +175,12 @@
 			<button type="button" class="add-btn" disabled={state.isRunning} on:click={() => addTime(10)}
 				>10초</button
 			>
+			<button type="button" class="add-btn" disabled={state.isRunning} on:click={() => addTime(1)}
+				>1초</button
+			>
+			<button type="button" class="add-btn" disabled={state.isRunning} on:click={() => addTimer()}
+				>ADD</button
+			>
 		</div>
 	</div>
 </main>
@@ -151,6 +188,9 @@
 <style lang="scss">
 	.timer-container {
 		@apply flex flex-col justify-center items-center min-h-screen bg-gray-100 gap-5 border border-black;
+		.timer-progress {
+			@apply w-full h-3 px-4;
+		}
 		.timer-message {
 			@apply font-sans text-4xl text-gray-800;
 		}
@@ -184,6 +224,12 @@
 			}
 			.add-btn:disabled {
 				@apply bg-gray-300 cursor-not-allowed;
+			}
+		}
+		.timer-list {
+			@apply flex gap-3;
+			div {
+				@apply font-sans text-lg text-gray-800;
 			}
 		}
 	}
